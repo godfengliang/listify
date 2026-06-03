@@ -1,4 +1,4 @@
-"""API routes for Listify — auth, generation, analysis, and history."""
+"""API routes for Listify — auth, generation, analysis, referral, and history."""
 
 import json
 from fastapi import APIRouter, HTTPException, Request, Response
@@ -10,6 +10,7 @@ from app.auth import (
     decrement_free_generations, save_listing,
     get_user_listings, get_listing,
 )
+from app.referral import get_referral_code, apply_referral, get_referral_stats
 
 router = APIRouter()
 _sessions: dict[str, dict] = {}
@@ -18,59 +19,6 @@ _sessions: dict[str, dict] = {}
 def _get_session(request: Request) -> dict | None:
     token = request.cookies.get("session_token")
     return _sessions.get(token) if token else None
-
-
-# ─── Auth ───
-
-class RegisterRequest(BaseModel):
-    email: str
-    password: str
-    name: str = ""
-
-class LoginRequest(BaseModel):
-    email: str
-    password: str
-
-
-@router.post("/api/register")
-async def api_register(req: RegisterRequest, response: Response):
-    if len(req.password) < 6:
-        raise HTTPException(400, "密码至少6位")
-    user = create_user(req.email, req.password, req.name)
-    if not user:
-        raise HTTPException(400, "邮箱已注册")
-    token = _create_session(user)
-    response.set_cookie("session_token", token, httponly=True, max_age=86400 * 30)
-    return {"ok": True, "user": {"id": user["id"], "email": user["email"], "plan": user["plan"]}}
-
-
-@router.post("/api/login")
-async def api_login(req: LoginRequest, response: Response):
-    user = verify_user(req.email, req.password)
-    if not user:
-        raise HTTPException(401, "邮箱或密码错误")
-    token = _create_session(user)
-    response.set_cookie("session_token", token, httponly=True, max_age=86400 * 30)
-    return {"ok": True, "user": {"id": user["id"], "email": user["email"], "plan": user["plan"]}}
-
-
-@router.post("/api/logout")
-async def api_logout(request: Request, response: Response):
-    token = request.cookies.get("session_token")
-    if token and token in _sessions:
-        del _sessions[token]
-    response.delete_cookie("session_token")
-    return {"ok": True}
-
-
-@router.get("/api/me")
-async def api_me(request: Request):
-    session = _get_session(request)
-    if not session:
-        raise HTTPException(401, "未登录")
-    user = get_user(session["user_id"])
-    return {"id": user["id"], "email": user["email"], "name": user["name"],
-            "plan": user["plan"], "free_generations_left": user["free_generations_left"]}
 
 
 def _create_session(user: dict) -> str:
@@ -88,7 +36,77 @@ def _check_auth_and_quota(request: Request) -> tuple[dict, dict]:
     if not allowed:
         user = get_user(session["user_id"])
         raise HTTPException(403, f"免费次数已用完，请升级到 Pro 计划。剩余次数：{user['free_generations_left']}")
-    return session, user
+    return session, get_user(session["user_id"])
+
+
+# ─── Auth ───
+
+class RegisterRequest(BaseModel):
+    email: str
+    password: str
+    name: str = ""
+    ref: str = ""
+
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+
+@router.post("/api/register")
+async def api_register(req: RegisterRequest, response: Response):
+    if len(req.password) < 6:
+        raise HTTPException(400, "密码至少6位")
+    user = create_user(req.email, req.password, req.name)
+    if not user:
+        raise HTTPException(400, "邮箱已注册")
+    # Apply referral if provided
+    if req.ref:
+        apply_referral(req.ref, user["id"])
+    token = _create_session(user)
+    response.set_cookie("session_token", token, httponly=True, max_age=86400 * 30)
+    updated_user = get_user(user["id"])
+    return {"ok": True, "user": {
+        "id": updated_user["id"], "email": updated_user["email"],
+        "plan": updated_user["plan"],
+        "free_generations_left": updated_user["free_generations_left"],
+    }}
+
+
+@router.post("/api/login")
+async def api_login(req: LoginRequest, response: Response):
+    user = verify_user(req.email, req.password)
+    if not user:
+        raise HTTPException(401, "邮箱或密码错误")
+    token = _create_session(user)
+    response.set_cookie("session_token", token, httponly=True, max_age=86400 * 30)
+    return {"ok": True, "user": {
+        "id": user["id"], "email": user["email"], "plan": user["plan"],
+        "free_generations_left": user["free_generations_left"],
+    }}
+
+
+@router.post("/api/logout")
+async def api_logout(request: Request, response: Response):
+    token = request.cookies.get("session_token")
+    if token and token in _sessions:
+        del _sessions[token]
+    response.delete_cookie("session_token")
+    return {"ok": True}
+
+
+@router.get("/api/me")
+async def api_me(request: Request):
+    session = _get_session(request)
+    if not session:
+        raise HTTPException(401, "未登录")
+    user = get_user(session["user_id"])
+    ref = get_referral_stats(session["user_id"])
+    return {
+        "id": user["id"], "email": user["email"], "name": user["name"],
+        "plan": user["plan"], "free_generations_left": user["free_generations_left"],
+        "referral": ref,
+    }
 
 
 # ─── Listing generation ───
@@ -103,21 +121,17 @@ class ListingRequest(BaseModel):
 
 @router.post("/api/generate")
 async def api_generate_listings(req: ListingRequest, request: Request):
-    session, _ = _check_auth_and_quota(request)
+    session, user = _check_auth_and_quota(request)
     if not req.product_name.strip():
         raise HTTPException(400, "产品名称不能为空")
-
     try:
         result = generate_listings(
-            product_name=req.product_name,
-            product_specs=req.product_specs,
-            target_audience=req.target_audience,
-            key_selling_points=req.key_selling_points,
+            product_name=req.product_name, product_specs=req.product_specs,
+            target_audience=req.target_audience, key_selling_points=req.key_selling_points,
             language=req.language,
         )
         result_json = json.dumps(result, ensure_ascii=False)
         save_listing(session["user_id"], req.product_name, req.product_specs, req.language, result_json)
-        user = get_user(session["user_id"])
         result["_meta"] = {
             "generations_left": user["free_generations_left"] if user["plan"] == "free" else "∞",
             "plan": user["plan"],
@@ -139,17 +153,12 @@ class CompetitorRequest(BaseModel):
 
 @router.post("/api/analyze-competitor")
 async def api_analyze_competitor(req: CompetitorRequest, request: Request):
-    session, _ = _check_auth_and_quota(request)
-
+    _check_auth_and_quota(request)
     try:
-        result = analyze_competitor(
-            your_product=req.your_product,
-            competitor_title=req.competitor_title,
-            competitor_description=req.competitor_description,
-            platform=req.platform,
-            language=req.language,
+        return analyze_competitor(
+            your_product=req.your_product, competitor_title=req.competitor_title,
+            competitor_description=req.competitor_description, platform=req.platform, language=req.language,
         )
-        return result
     except Exception as e:
         raise HTTPException(500, f"分析失败：{str(e)}")
 
@@ -165,16 +174,12 @@ class KeywordRequest(BaseModel):
 
 @router.post("/api/seo-keywords")
 async def api_seo_keywords(req: KeywordRequest, request: Request):
-    session, _ = _check_auth_and_quota(request)
-
+    _check_auth_and_quota(request)
     try:
-        result = generate_seo_keywords(
-            product_name=req.product_name,
-            product_specs=req.product_specs,
-            platform=req.platform,
-            language=req.language,
+        return generate_seo_keywords(
+            product_name=req.product_name, product_specs=req.product_specs,
+            platform=req.platform, language=req.language,
         )
-        return result
     except Exception as e:
         raise HTTPException(500, f"生成失败：{str(e)}")
 

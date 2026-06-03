@@ -2,7 +2,6 @@
 
 import sqlite3
 import os
-from datetime import datetime, timezone
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "listify.db")
 
@@ -28,6 +27,8 @@ def init_db():
             lemon_squeezy_customer_id TEXT,
             lemon_squeezy_subscription_id TEXT,
             free_generations_left INTEGER DEFAULT 3,
+            referral_code TEXT UNIQUE,
+            referred_by INTEGER,
             created_at TEXT DEFAULT (datetime('now')),
             updated_at TEXT DEFAULT (datetime('now'))
         );
@@ -45,6 +46,7 @@ def init_db():
 
         CREATE INDEX IF NOT EXISTS idx_listings_user ON listings(user_id);
         CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+        CREATE INDEX IF NOT EXISTS idx_users_referral ON users(referral_code);
     """)
     conn.commit()
     conn.close()
