@@ -1,22 +1,17 @@
-"""API routes for Listify — with auth, usage limits, and listing history."""
+"""API routes for Listify — auth, generation, analysis, and history."""
 
 import json
 from fastapi import APIRouter, HTTPException, Request, Response
 from pydantic import BaseModel
 from app.core.generator import generate_listings
+from app.core.analyzer import analyze_competitor, generate_seo_keywords
 from app.auth import (
-    create_user,
-    verify_user,
-    get_user,
-    decrement_free_generations,
-    save_listing,
-    get_user_listings,
-    get_listing,
+    create_user, verify_user, get_user,
+    decrement_free_generations, save_listing,
+    get_user_listings, get_listing,
 )
 
 router = APIRouter()
-
-# Simple session token store (in production use Redis/JWT)
 _sessions: dict[str, dict] = {}
 
 
@@ -31,7 +26,6 @@ class RegisterRequest(BaseModel):
     email: str
     password: str
     name: str = ""
-
 
 class LoginRequest(BaseModel):
     email: str
@@ -86,6 +80,17 @@ def _create_session(user: dict) -> str:
     return token
 
 
+def _check_auth_and_quota(request: Request) -> tuple[dict, dict]:
+    session = _get_session(request)
+    if not session:
+        raise HTTPException(401, "请先登录")
+    allowed = decrement_free_generations(session["user_id"])
+    if not allowed:
+        user = get_user(session["user_id"])
+        raise HTTPException(403, f"免费次数已用完，请升级到 Pro 计划。剩余次数：{user['free_generations_left']}")
+    return session, user
+
+
 # ─── Listing generation ───
 
 class ListingRequest(BaseModel):
@@ -98,18 +103,9 @@ class ListingRequest(BaseModel):
 
 @router.post("/api/generate")
 async def api_generate_listings(req: ListingRequest, request: Request):
-    session = _get_session(request)
-    if not session:
-        raise HTTPException(401, "请先登录")
-
+    session, _ = _check_auth_and_quota(request)
     if not req.product_name.strip():
         raise HTTPException(400, "产品名称不能为空")
-
-    # Check usage limit
-    allowed = decrement_free_generations(session["user_id"])
-    if not allowed:
-        user = get_user(session["user_id"])
-        raise HTTPException(403, f"免费次数已用完，请升级到 Pro 计划。剩余次数：{user['free_generations_left']}")
 
     try:
         result = generate_listings(
@@ -121,12 +117,63 @@ async def api_generate_listings(req: ListingRequest, request: Request):
         )
         result_json = json.dumps(result, ensure_ascii=False)
         save_listing(session["user_id"], req.product_name, req.product_specs, req.language, result_json)
-
         user = get_user(session["user_id"])
         result["_meta"] = {
             "generations_left": user["free_generations_left"] if user["plan"] == "free" else "∞",
             "plan": user["plan"],
         }
+        return result
+    except Exception as e:
+        raise HTTPException(500, f"生成失败：{str(e)}")
+
+
+# ─── Competitor Analysis ───
+
+class CompetitorRequest(BaseModel):
+    your_product: str
+    competitor_title: str
+    competitor_description: str = ""
+    platform: str = "amazon"
+    language: str = "English"
+
+
+@router.post("/api/analyze-competitor")
+async def api_analyze_competitor(req: CompetitorRequest, request: Request):
+    session, _ = _check_auth_and_quota(request)
+
+    try:
+        result = analyze_competitor(
+            your_product=req.your_product,
+            competitor_title=req.competitor_title,
+            competitor_description=req.competitor_description,
+            platform=req.platform,
+            language=req.language,
+        )
+        return result
+    except Exception as e:
+        raise HTTPException(500, f"分析失败：{str(e)}")
+
+
+# ─── SEO Keywords ───
+
+class KeywordRequest(BaseModel):
+    product_name: str
+    product_specs: str
+    platform: str = "amazon"
+    language: str = "English"
+
+
+@router.post("/api/seo-keywords")
+async def api_seo_keywords(req: KeywordRequest, request: Request):
+    session, _ = _check_auth_and_quota(request)
+
+    try:
+        result = generate_seo_keywords(
+            product_name=req.product_name,
+            product_specs=req.product_specs,
+            platform=req.platform,
+            language=req.language,
+        )
         return result
     except Exception as e:
         raise HTTPException(500, f"生成失败：{str(e)}")
