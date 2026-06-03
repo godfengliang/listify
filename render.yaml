@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: listify
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: AI_API_KEY
+        sync: false
+      - key: AI_BASE_URL
+        value: https://api.deepseek.com
+      - key: AI_MODEL
+        value: deepseek-v4-pro
+      - key: LEMON_SQUEEZY_API_KEY
+        sync: false
+    plan: free
