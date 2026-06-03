@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listify - AI 多平台 Listing 一键生成器</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">📦 Listify</div>
+        <div class="tagline">一键生成 Amazon · Shopify · Temu · TikTok Shop Listing</div>
+        <div class="nav-right" id="nav-auth">
+            <!-- 动态：登录/注册 或 用户信息 -->
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- ===== 未登录：登录/注册 ===== -->
+        <section id="auth-section" class="auth-section">
+            <div class="auth-card">
+                <h2>🚀 开始使用 Listify</h2>
+                <p class="auth-subtitle">注册即送 3 次免费生成</p>
+
+                <div class="auth-tabs">
+                    <button class="auth-tab active" onclick="showAuthTab('login')">登录</button>
+                    <button class="auth-tab" onclick="showAuthTab('register')">注册</button>
+                </div>
+
+                <!-- 登录 -->
+                <form id="login-form" class="auth-form">
+                    <input type="email" id="login-email" placeholder="邮箱" required>
+                    <input type="password" id="login-password" placeholder="密码" required>
+                    <button type="submit" class="btn-primary">登录</button>
+                </form>
+
+                <!-- 注册 -->
+                <form id="register-form" class="auth-form hidden">
+                    <input type="text" id="reg-name" placeholder="姓名（选填）">
+                    <input type="email" id="reg-email" placeholder="邮箱" required>
+                    <input type="password" id="reg-password" placeholder="密码（至少6位）" required>
+                    <button type="submit" class="btn-primary">注册</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- ===== 已登录：主功能区 ===== -->
+        <section id="main-section" class="hidden">
+            <!-- 用户信息条 -->
+            <div class="user-bar">
+                <span id="user-info"></span>
+                <button class="btn-sm" onclick="showHistory()">📋 历史记录</button>
+                <button class="btn-sm btn-logout" onclick="logout()">退出</button>
+            </div>
+
+            <!-- 输入区 -->
+            <div class="input-section">
+                <h2>🛒 输入产品信息</h2>
+                <form id="listing-form">
+                    <div class="form-group">
+                        <label for="product_name">产品名称 <span class="required">*</span></label>
+                        <input type="text" id="product_name" placeholder='如：Wireless Bluetooth Earbuds TWS' required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="product_specs">产品规格/描述 <span class="required">*</span></label>
+                        <textarea id="product_specs" rows="5"
+                            placeholder="如：&#10;- Bluetooth 5.3&#10;- 40小时续航&#10;- 主动降噪 ANC&#10;- IPX7 防水&#10;- 触控操作" required></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label for="target_audience">目标人群</label>
+                            <input type="text" id="target_audience" placeholder="如：健身爱好者、通勤族">
+                        </div>
+                        <div class="form-group half">
+                            <label for="key_selling_points">核心卖点</label>
+                            <input type="text" id="key_selling_points" placeholder="如：超长续航、降噪顶级">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="language">输出语言</label>
+                        <select id="language">
+                            <option value="English">English</option>
+                            <option value="简体中文">简体中文</option>
+                            <option value="日本語">日本語</option>
+                            <option value="Deutsch">Deutsch</option>
+                            <option value="Français">Français</option>
+                            <option value="Español">Español</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" id="generate-btn" class="btn-primary">
+                        ⚡ 一键生成全平台 Listing
+                    </button>
+                    <div class="generations-left" id="generations-left"></div>
+                </form>
+            </div>
+
+            <!-- 加载 -->
+            <div id="loading" class="loading hidden">
+                <div class="spinner"></div>
+                <p>AI 正在生成中，约 10-20 秒...</p>
+            </div>
+
+            <!-- 历史记录 -->
+            <div id="history-section" class="results hidden">
+                <h2>📋 历史记录</h2>
+                <div id="history-list"></div>
+            </div>
+
+            <!-- 结果区 -->
+            <div id="results" class="results hidden">
+                <h2>🎯 生成结果</h2>
+
+                <div class="tabs">
+                    <button class="tab active" data-platform="amazon">Amazon</button>
+                    <button class="tab" data-platform="shopify">Shopify</button>
+                    <button class="tab" data-platform="temu">Temu</button>
+                    <button class="tab" data-platform="tiktok">TikTok Shop</button>
+                    <button class="tab" data-platform="extras">关键词 & 标签</button>
+                </div>
+
+                <div class="tab-content active" id="tab-amazon">
+                    <div class="result-block"><h3>📌 标题</h3><div class="result-text" id="amazon-title"></div><button class="btn-copy" onclick="copyText('amazon-title')">📋 复制</button></div>
+                    <div class="result-block"><h3>🎯 Bullet Points</h3><div class="result-text" id="amazon-bullets"></div><button class="btn-copy" onclick="copyText('amazon-bullets')">📋 复制</button></div>
+                    <div class="result-block"><h3>📝 产品描述</h3><div class="result-text" id="amazon-description"></div><button class="btn-copy" onclick="copyText('amazon-description')">📋 复制</button></div>
+                    <div class="result-block"><h3>🔍 后台搜索词</h3><div class="result-text" id="amazon-search-terms"></div><button class="btn-copy" onclick="copyText('amazon-search-terms')">📋 复制</button></div>
+                </div>
+
+                <div class="tab-content" id="tab-shopify">
+                    <div class="result-block"><h3>📌 SEO 标题</h3><div class="result-text" id="shopify-seo-title"></div><button class="btn-copy" onclick="copyText('shopify-seo-title')">📋 复制</button></div>
+                    <div class="result-block"><h3>📝 产品描述</h3><div class="result-text" id="shopify-description"></div><button class="btn-copy" onclick="copyText('shopify-description')">📋 复制</button></div>
+                    <div class="result-block"><h3>🏷️ Meta Description</h3><div class="result-text" id="shopify-meta"></div><button class="btn-copy" onclick="copyText('shopify-meta')">📋 复制</button></div>
+                    <div class="result-block"><h3>🔗 URL Handle</h3><div class="result-text" id="shopify-url"></div><button class="btn-copy" onclick="copyText('shopify-url')">📋 复制</button></div>
+                </div>
+
+                <div class="tab-content" id="tab-temu">
+                    <div class="result-block"><h3>📌 标题</h3><div class="result-text" id="temu-title"></div><button class="btn-copy" onclick="copyText('temu-title')">📋 复制</button></div>
+                    <div class="result-block"><h3>📝 产品描述</h3><div class="result-text" id="temu-description"></div><button class="btn-copy" onclick="copyText('temu-description')">📋 复制</button></div>
+                    <div class="result-block"><h3>🎯 核心卖点</h3><div class="result-text" id="temu-selling-points"></div><button class="btn-copy" onclick="copyText('temu-selling-points')">📋 复制</button></div>
+                </div>
+
+                <div class="tab-content" id="tab-tiktok">
+                    <div class="result-block"><h3>📌 标题</h3><div class="result-text" id="tiktok-title"></div><button class="btn-copy" onclick="copyText('tiktok-title')">📋 复制</button></div>
+                    <div class="result-block"><h3>📝 产品描述</h3><div class="result-text" id="tiktok-description"></div><button class="btn-copy" onclick="copyText('tiktok-description')">📋 复制</button></div>
+                    <div class="result-block"><h3>🎬 视频脚本建议</h3><div class="result-text" id="tiktok-script"></div><button class="btn-copy" onclick="copyText('tiktok-script')">📋 复制</button></div>
+                </div>
+
+                <div class="tab-content" id="tab-extras">
+                    <div class="result-block"><h3>🔍 SEO 关键词</h3><div class="result-text" id="seo-keywords"></div><button class="btn-copy" onclick="copyText('seo-keywords')">📋 复制</button></div>
+                    <div class="result-block"><h3>🏷️ 推荐标签</h3><div class="result-text" id="suggested-tags"></div><button class="btn-copy" onclick="copyText('suggested-tags')">📋 复制</button></div>
+                </div>
+            </div>
+
+            <!-- 付费墙 -->
+            <div id="paywall" class="paywall hidden">
+                <h2>🔒 免费次数已用完</h2>
+                <p>升级 Pro，无限生成 Listing</p>
+                <ul>
+                    <li>✅ 无限次生成</li>
+                    <li>✅ 全平台支持</li>
+                    <li>✅ 多语言输出</li>
+                    <li>✅ 历史记录永久保存</li>
+                </ul>
+                <button class="btn-primary btn-upgrade" onclick="upgradePlan()">💎 升级 Pro — $29/月</button>
+            </div>
+        </section>
+
+        <div id="error" class="error hidden"><p id="error-msg"></p></div>
+    </main>
+
+    <footer><p>Powered by Listify AI · Listify © 2026</p></footer>
+    <script src="/static/app.js"></script>
+</body>
+</html>
