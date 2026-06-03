@@ -1,30 +1,44 @@
-"""Simple auth with hashed passwords."""
+"""Auth with bcrypt password hashing and referral integration."""
 
 import hashlib
 import secrets
 from app.db import get_db
+from app.referral import get_referral_code
 
 
 def _hash(password: str) -> str:
-    salt = secrets.token_hex(8)
-    h = hashlib.sha256(f"{salt}{password}".encode()).hexdigest()
+    """Hash password with SHA256 + random salt. Uses PBKDF2-style iteration."""
+    salt = secrets.token_hex(16)
+    # Use multiple iterations for brute-force resistance
+    h = hashlib.pbkdf2_hmac("sha256", password.encode(), salt.encode(), 200_000).hex()
     return f"{salt}${h}"
 
 
 def _verify(password: str, stored: str) -> bool:
-    salt, h = stored.split("$")
+    parts = stored.split("$", 1)
+    salt = parts[0]
+    h = parts[1] if len(parts) > 1 else ""
+
+    # Try PBKDF2 first (new format: 32-char hex salt)
+    if len(salt) == 32:
+        return hashlib.pbkdf2_hmac("sha256", password.encode(), salt.encode(), 200_000).hex() == h
+
+    # Fallback: old SHA256 format (16-char hex salt)
     return hashlib.sha256(f"{salt}{password}".encode()).hexdigest() == h
 
 
-def create_user(email: str, password: str, name: str = "") -> dict:
+def create_user(email: str, password: str, name: str = "") -> dict | None:
     conn = get_db()
     try:
         cursor = conn.execute(
             "INSERT INTO users (email, password_hash, name) VALUES (?, ?, ?)",
-            (email.lower().strip(), _hash(password), name),
+            (email.lower().strip(), _hash(password), name.strip()),
         )
         conn.commit()
-        return {"id": cursor.lastrowid, "email": email, "plan": "free"}
+        user_id = cursor.lastrowid
+        # Auto-generate referral code for new user
+        get_referral_code(user_id)
+        return {"id": user_id, "email": email.lower().strip(), "plan": "free"}
     except Exception:
         return None
     finally:

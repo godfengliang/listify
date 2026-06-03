@@ -51,7 +51,10 @@ async function handleRegister(e) {
     const name = document.getElementById('reg-name').value;
     const email = document.getElementById('reg-email').value;
     const password = document.getElementById('reg-password').value;
-    const res = await api('/api/register', 'POST', { email, password, name });
+    const ref = document.getElementById('reg-ref').value.trim();
+    const body = { email, password, name };
+    if (ref) body.ref = ref;
+    const res = await api('/api/register', 'POST', body);
     if (res.ok) checkAuth();
     else alert(res.data?.detail || '注册失败');
 }
@@ -67,13 +70,23 @@ async function checkAuth() {
         const user = res.data;
         document.getElementById('auth-section').classList.add('hidden');
         document.getElementById('main-section').classList.remove('hidden');
-        document.getElementById('user-info').textContent = `${user.email} (${user.plan === 'free' ? '免费版 · 剩余 ' + user.free_generations_left + ' 次' : 'Pro ♾️'})`;
+        const refInfo = user.referral
+            ? ` | 🔗 推荐码: <span class="ref-code" onclick="copyReferralLink('${user.referral.referral_code}')" title="点击复制推荐链接">${user.referral.referral_code} (已邀请 ${user.referral.referrals_count} 人)</span>`
+            : '';
+        document.getElementById('user-info').innerHTML = `${user.email} (${user.plan === 'free' ? '免费版 · 剩余 ' + user.free_generations_left + ' 次' : 'Pro ♾️'})${refInfo}`;
         document.getElementById('generations-left').textContent =
             user.plan === 'free' ? `剩余免费次数：${user.free_generations_left}` : 'Pro 无限生成';
     } else {
         document.getElementById('auth-section').classList.remove('hidden');
         document.getElementById('main-section').classList.add('hidden');
     }
+}
+
+function copyReferralLink(code) {
+    const link = `${window.location.origin}?ref=${code}`;
+    navigator.clipboard.writeText(link).then(() => {
+        alert(`推荐链接已复制！\n\n${link}\n\n分享给朋友，双方各得 3 次免费生成。`);
+    });
 }
 
 // ─── Generate ───
@@ -151,8 +164,17 @@ async function loadListing(id) {
 }
 
 // ─── Upgrade ───
-function upgradePlan() {
-    alert('支付功能即将上线！请联系我们开通 Pro：hello@listify.ai');
+async function upgradePlan() {
+    try {
+        const res = await api('/api/create-checkout', 'POST');
+        if (res.ok && res.data.checkout_url) {
+            window.open(res.data.checkout_url, '_blank');
+        } else {
+            alert('支付功能即将上线！请联系我们开通 Pro：hello@listify.ai');
+        }
+    } catch (e) {
+        alert('支付功能即将上线！请联系我们开通 Pro：hello@listify.ai');
+    }
 }
 
 // ─── Render ───

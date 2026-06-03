@@ -46,10 +46,21 @@ def init_db():
 
         CREATE INDEX IF NOT EXISTS idx_listings_user ON listings(user_id);
         CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
-        CREATE INDEX IF NOT EXISTS idx_users_referral ON users(referral_code);
     """)
+    # Add columns that might be missing from older DBs
+    _migrate(conn)
     conn.commit()
     conn.close()
+
+
+def _migrate(conn):
+    """Add missing columns to existing tables."""
+    existing_cols = [r[1] for r in conn.execute("PRAGMA table_info(users)").fetchall()]
+    if "referral_code" not in existing_cols:
+        conn.execute("ALTER TABLE users ADD COLUMN referral_code TEXT")
+    if "referred_by" not in existing_cols:
+        conn.execute("ALTER TABLE users ADD COLUMN referred_by INTEGER")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_users_referral ON users(referral_code)")
 
 
 init_db()

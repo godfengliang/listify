@@ -1,6 +1,7 @@
-"""API routes for Listify — auth, generation, analysis, referral, and history."""
+"""API routes for Listify — auth, generation, analysis, referral, payment, and history."""
 
 import json
+import httpx
 from fastapi import APIRouter, HTTPException, Request, Response
 from pydantic import BaseModel
 from app.core.generator import generate_listings
@@ -11,6 +12,7 @@ from app.auth import (
     get_user_listings, get_listing,
 )
 from app.referral import get_referral_code, apply_referral, get_referral_stats
+from app.config import LEMON_SQUEEZY_API_KEY, LEMON_SQUEEZY_STORE_ID
 
 router = APIRouter()
 _sessions: dict[str, dict] = {}
@@ -208,3 +210,90 @@ async def api_get_listing(listing_id: int, request: Request):
 @router.get("/api/health")
 async def health():
     return {"status": "ok", "service": "Listify API"}
+
+
+# ─── Payment ───
+
+@router.post("/api/create-checkout")
+async def create_checkout(request: Request):
+    """Create a Lemon Squeezy checkout session for Pro upgrade."""
+    session = _get_session(request)
+    if not session:
+        raise HTTPException(401, "请先登录")
+
+    if not LEMON_SQUEEZY_API_KEY or not LEMON_SQUEEZY_STORE_ID:
+        raise HTTPException(503, "支付系统暂未配置")
+
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                "https://api.lemonsqueezy.com/v1/checkouts",
+                headers={
+                    "Accept": "application/vnd.api+json",
+                    "Content-Type": "application/vnd.api+json",
+                    "Authorization": f"Bearer {LEMON_SQUEEZY_API_KEY}",
+                },
+                json={
+                    "data": {
+                        "type": "checkouts",
+                        "attributes": {
+                            "checkout_data": {
+                                "email": session["email"],
+                                "custom": {"user_id": str(session["user_id"])},
+                            },
+                            "product_options": {
+                                "redirect_url": f"{request.base_url}",
+                            },
+                        },
+                        "relationships": {
+                            "store": {
+                                "data": {
+                                    "type": "stores",
+                                    "id": LEMON_SQUEEZY_STORE_ID,
+                                }
+                            },
+                            "variant": {
+                                "data": {
+                                    "type": "variants",
+                                    "id": "1",  # Default variant — update with actual variant ID
+                                }
+                            },
+                        },
+                    }
+                },
+                timeout=15.0,
+            )
+            data = resp.json()
+            if resp.status_code == 201:
+                checkout_url = data["data"]["attributes"]["url"]
+                return {"ok": True, "checkout_url": checkout_url}
+            else:
+                raise HTTPException(502, f"支付服务错误: {data.get('errors', 'unknown')}")
+    except httpx.TimeoutException:
+        raise HTTPException(504, "支付服务超时，请稍后再试")
+    except Exception as e:
+        raise HTTPException(500, f"创建支付失败: {str(e)}")
+
+
+@router.post("/api/webhook/lemon-squeezy")
+async def lemon_squeezy_webhook(request: Request):
+    """Handle Lemon Squeezy webhook events."""
+    try:
+        body = await request.json()
+        event_name = body.get("meta", {}).get("event_name", "")
+        custom_data = body.get("meta", {}).get("custom_data", {})
+        user_id = custom_data.get("user_id")
+
+        if event_name == "order_created" and user_id:
+            from app.db import get_db
+            conn = get_db()
+            conn.execute(
+                "UPDATE users SET plan = 'pro', lemon_squeezy_subscription_id = ? WHERE id = ?",
+                (str(body.get("data", {}).get("id", "")), int(user_id)),
+            )
+            conn.commit()
+            conn.close()
+
+        return {"ok": True}
+    except Exception as e:
+        raise HTTPException(400, f"Webhook error: {str(e)}")
