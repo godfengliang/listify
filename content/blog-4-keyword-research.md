@@ -61,7 +61,7 @@ Long-tail keywords convert at 2-3x higher rates because the buyer knows exactly 
 
 **Listify** generates optimized keywords AND places them correctly in your listing — for Amazon, Shopify, Temu, and TikTok Shop simultaneously.
 
-[Try free →](https://listify.ai)
+[Try free →](https://web-production-65f93.up.railway.app)
 
 ---
 

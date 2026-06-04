@@ -64,7 +64,7 @@ AI sometimes misses cultural references or idioms that resonate with specific au
 
 The best approach: use AI for the heavy lifting, then add your brand voice and cultural nuances.
 
-[Try Listify free →](https://listify.ai)
+[Try Listify free →](https://web-production-65f93.up.railway.app)
 
 ---
 

@@ -55,7 +55,7 @@ async def robots():
     return PlainTextResponse("""User-agent: *
 Allow: /
 Allow: /blog
-Sitemap: https://listify.ai/sitemap.xml""")
+Sitemap: https://web-production-65f93.up.railway.app/sitemap.xml""")
 
 
 @app.get("/sitemap.xml")
@@ -64,9 +64,9 @@ async def sitemap():
     from app.blog_routes import _get_blog_files
     posts = _get_blog_files()
     urls = []
-    urls.append("  <url><loc>https://listify.ai/</loc><priority>1.0</priority></url>")
-    urls.append("  <url><loc>https://listify.ai/blog</loc><priority>0.9</priority></url>")
+    urls.append("  <url><loc>https://web-production-65f93.up.railway.app/</loc><priority>1.0</priority></url>")
+    urls.append("  <url><loc>https://web-production-65f93.up.railway.app/blog</loc><priority>0.9</priority></url>")
     for p in posts:
-        urls.append(f"  <url><loc>https://listify.ai/blog/{p['slug']}</loc><priority>0.7</priority></url>")
+        urls.append(f"  <url><loc>https://web-production-65f93.up.railway.app/blog/{p['slug']}</loc><priority>0.7</priority></url>")
     xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + '\n'.join(urls) + '\n</urlset>'
     return Response(content=xml, media_type="application/xml")

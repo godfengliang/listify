@@ -68,7 +68,7 @@ The problem: **4 different listing formats = 4x the work.**
 
 **Listify** generates optimized listings for all 4 platforms simultaneously. One product input → 4 complete listings, each formatted for its platform's requirements.
 
-[Try free →](https://listify.ai)
+[Try free →](https://web-production-65f93.up.railway.app)
 
 ---
 

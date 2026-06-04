@@ -182,7 +182,7 @@ Writing 4 different listings for every product sounds awful because it IS awful 
 
 **Listify** was built exactly for this: one product input → 4 platform-optimized listings, each with the right tone, format, and keywords.
 
-[Generate your multi-platform listings free →](https://listify.ai)
+[Generate your multi-platform listings free →](https://web-production-65f93.up.railway.app)
 
 ---
 

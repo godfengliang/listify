@@ -70,4 +70,4 @@ For 50 products: **4 hours/month = 97% time savings**
 3. Get all 4 platform listings instantly
 4. Upgrade to Pro for unlimited access
 
-[Try Listify free →](https://listify.ai)
+[Try Listify free →](https://web-production-65f93.up.railway.app)

@@ -225,7 +225,7 @@ Great images + terrible copy = lost sales.
 
 **Listify** pairs your professional images with SEO-optimized titles, bullets, and descriptions — for Amazon, Shopify, Temu, and TikTok Shop.
 
-[Generate your optimized listing →](https://listify.ai)
+[Generate your optimized listing →](https://web-production-65f93.up.railway.app)
 
 ---
 

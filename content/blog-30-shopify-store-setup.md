@@ -267,7 +267,7 @@ Building the store is the easy part. Writing product descriptions that convert �
 
 **Listify** generates SEO-optimized Shopify product descriptions, titles, and meta tags for all your products in minutes.
 
-[Generate Shopify listings free →](https://listify.ai)
+[Generate Shopify listings free →](https://web-production-65f93.up.railway.app)
 
 ---
 

@@ -73,4 +73,4 @@ Focus on value, not technical specs:
 
 **Listify** creates Temu-optimized listings automatically — along with Amazon, Shopify, and TikTok Shop versions.
 
-[Try free →](https://listify.ai)
+[Try free →](https://web-production-65f93.up.railway.app)

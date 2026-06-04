@@ -181,7 +181,7 @@ Checks 1-34 (title, bullets, description, search terms) are the most time-consum
 
 **Listify** generates every text element of this checklist optimized for Amazon's algorithm — title, 5 bullets, description, and backend search terms — all in one click.
 
-[Audit and fix your listing free →](https://listify.ai)
+[Audit and fix your listing free →](https://web-production-65f93.up.railway.app)
 
 ---
 

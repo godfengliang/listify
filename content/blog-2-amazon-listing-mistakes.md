@@ -80,4 +80,4 @@ Your Amazon listing won't work on Shopify. Your Temu listing shouldn't be copy-p
 
 **Listify** generates optimized listings for Amazon, Shopify, Temu, and TikTok Shop simultaneously — with proper keywords, formatting, and platform-specific optimization.
 
-[Try it free →](https://listify.ai)
+[Try it free →](https://web-production-65f93.up.railway.app)

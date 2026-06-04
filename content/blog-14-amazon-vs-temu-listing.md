@@ -53,4 +53,4 @@ Here are the 7 critical differences and how to handle each one.
 
 **Listify** generates both Amazon and Temu listings from a single product input — each optimized for its platform's requirements.
 
-[Try free →](https://listify.ai)
+[Try free →](https://web-production-65f93.up.railway.app)

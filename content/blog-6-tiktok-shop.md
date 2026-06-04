@@ -64,4 +64,4 @@ Write like you're texting a friend:
 
 **Listify** generates TikTok Shop listings with video script suggestions automatically — plus matching listings for Amazon, Shopify, and Temu.
 
-[Try free →](https://listify.ai)
+[Try free →](https://web-production-65f93.up.railway.app)

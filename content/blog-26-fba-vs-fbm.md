@@ -148,7 +148,7 @@ FBA or FBM, one thing doesn't change: you need a professional listing.
 
 **Listify** generates optimized listings for any product — whether you're shipping it yourself or sending it to Amazon's warehouse.
 
-[Generate your listing free →](https://listify.ai)
+[Generate your listing free →](https://web-production-65f93.up.railway.app)
 
 ---
 

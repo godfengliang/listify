@@ -59,7 +59,7 @@
 
 试一个你正在卖的产品，看看效果。
 
-[Try Listify free →](https://listify.ai)
+[Try Listify free →](https://web-production-65f93.up.railway.app)
 
 ---
 

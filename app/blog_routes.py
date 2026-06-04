@@ -186,7 +186,7 @@ async def blog_index():
     <meta property="og:description" content="跨境电商 Listing 优化、SEO 关键词、多平台运营指南。免费 AI Listing 生成工具。">
     <meta property="og:type" content="website">
     <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://listify.ai/blog">
+    <link rel="canonical" href="https://web-production-65f93.up.railway.app/blog">
     <link rel="stylesheet" href="/static/style.css">
     <style>
         .blog-header {{ text-align: center; padding: 40px 20px 20px; }}
@@ -289,7 +289,7 @@ async def blog_post(slug: str):
     <meta property="og:description" content="{meta_description}">
     <meta property="og:type" content="article">
     <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://listify.ai/blog/{slug}">
+    <link rel="canonical" href="https://web-production-65f93.up.railway.app/blog/{slug}">
     <link rel="stylesheet" href="/static/style.css">
     <style>
         .blog-header {{ text-align: center; padding: 40px 20px 20px; }}

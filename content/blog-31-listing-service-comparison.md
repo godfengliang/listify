@@ -191,7 +191,7 @@ This approach minimizes upfront cost while maximizing quality where it matters.
 
 **Listify** gives you 3 free listing generations — enough to test your first batch of products. No credit card. No commitment.
 
-[Try Listify free →](https://listify.ai)
+[Try Listify free →](https://web-production-65f93.up.railway.app)
 
 ---
 

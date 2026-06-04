@@ -64,4 +64,4 @@ Even if the product is new, you can use early numbers. Temu shoppers trust quant
 
 **Listify** generates Temu-optimized listings with all 5 of these techniques built in — plus matching listings for Amazon, Shopify, and TikTok Shop.
 
-[Try free →](https://listify.ai)
+[Try free →](https://web-production-65f93.up.railway.app)

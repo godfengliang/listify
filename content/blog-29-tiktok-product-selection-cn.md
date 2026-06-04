@@ -188,7 +188,7 @@ TikTok Shop 的产品描述和 Amazon 完全不一样：
 
 **Listify** 自动适配四个平台的Listing风格 — 输入产品名，一键生成 Amazon + TikTok Shop + Shopify + Temu 版本。
 
-[免费生成 TikTok Shop Listing →](https://listify.ai)
+[免费生成 TikTok Shop Listing →](https://web-production-65f93.up.railway.app)
 
 ---
 

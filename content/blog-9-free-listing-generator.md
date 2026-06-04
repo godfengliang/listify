@@ -49,7 +49,7 @@ Amazon offers "Enhance My Listing" — but it's:
 
 All from a single product input. Free to start.
 
-[Try Listify free →](https://listify.ai)
+[Try Listify free →](https://web-production-65f93.up.railway.app)
 
 ## Real Example
 

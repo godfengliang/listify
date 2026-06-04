@@ -78,4 +78,4 @@ Yes. Listify supports English, Chinese, Japanese, German, French, and Spanish ou
 
 ---
 
-*Listify — AI Multi-Platform Listing Generator. [Try free →](https://listify.ai)*
+*Listify — AI Multi-Platform Listing Generator. [Try free →](https://web-production-65f93.up.railway.app)*

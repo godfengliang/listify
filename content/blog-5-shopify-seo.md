@@ -57,7 +57,7 @@ Focus on outcomes, not features.
 
 Writing optimized descriptions for hundreds of products is exhausting. **Listify** generates SEO-optimized Shopify product pages (title, description, meta tags, URL handle) automatically — plus matching listings for Amazon, Temu, and TikTok Shop.
 
-[Try free →](https://listify.ai)
+[Try free →](https://web-production-65f93.up.railway.app)
 
 ## FAQ
 

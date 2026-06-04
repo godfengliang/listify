@@ -57,7 +57,7 @@ Rewriting for 4 platforms = 2-3 hours per product. For 100 products = 200-300 ho
 
 **Free to start** — 3 listings included, no credit card required.
 
-[Try Listify free →](https://listify.ai)
+[Try Listify free →](https://web-production-65f93.up.railway.app)
 
 ---
 

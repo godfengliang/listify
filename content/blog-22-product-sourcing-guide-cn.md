@@ -196,7 +196,7 @@
 
 选品是对的，Listing 也是对的 → 竞争对手开始研究你的 Listing。
 
-[免费试用 Listify →](https://listify.ai)
+[免费试用 Listify →](https://web-production-65f93.up.railway.app)
 
 ---
 

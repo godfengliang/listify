@@ -166,7 +166,7 @@ Worth it? At 5% conversion lift on a $5K/month product, A+ Content pays for itse
 
 **Listify** generates complete A+ Content layouts — including module text, image briefs for your photographer, and comparison chart data — for any product in any category.
 
-[Generate your A+ Content free →](https://listify.ai)
+[Generate your A+ Content free →](https://web-production-65f93.up.railway.app)
 
 ---
 

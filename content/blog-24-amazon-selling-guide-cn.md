@@ -109,7 +109,7 @@
 - 后台搜索词建议
 - 同步生成 Shopify / Temu / TikTok Shop 版本
 
-[免费生成 →](https://listify.ai)
+[免费生成 →](https://web-production-65f93.up.railway.app)
 
 ---
 
@@ -210,4 +210,4 @@
 
 **Listify** 帮你 2 分钟生成一个专业 Listing，覆盖 Amazon + Shopify + Temu + TikTok Shop 四个平台。
 
-[免费开始 →](https://listify.ai)
+[免费开始 →](https://web-production-65f93.up.railway.app)

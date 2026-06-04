@@ -70,4 +70,4 @@ Here are 5 proven bullet point formulas with templates you can copy.
 
 **Listify** generates all 5 bullet points using these proven formulas — optimized for Amazon's algorithm and your specific product.
 
-[Try free →](https://listify.ai)
+[Try free →](https://web-production-65f93.up.railway.app)

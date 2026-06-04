@@ -17,7 +17,7 @@ Subject: 免费工具推荐：一键生成 4 个平台的 Listing
 
 免费 3 次，不需要信用卡。
 
-工具地址：https://listify.ai
+工具地址：https://web-production-65f93.up.railway.app
 
 如果感兴趣，我可以给你一个不限次数的 Pro 账号做测评。期待你的反馈！
 
@@ -37,7 +37,7 @@ Subject: 给你社群成员的免费福利：AI Listing 生成工具
 - 每个成员 5 次免费生成（比正常多 2 次）
 - 或一个 Pro 账号用于社群演示
 
-工具地址：https://listify.ai
+工具地址：https://web-production-65f93.up.railway.app
 
 如果你有兴趣合作，回复这封邮件就行。
 
@@ -58,7 +58,7 @@ Subject: 合作机会：AI Listing 工具能帮你们省 80% 的时间
 2. 作为你们的内部工具提升效率
 3. 或作为增值服务提供给你们的客户
 
-工具地址：https://listify.ai
+工具地址：https://web-production-65f93.up.railway.app
 
 期待你的回复。
 

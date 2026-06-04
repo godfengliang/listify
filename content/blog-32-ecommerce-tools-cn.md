@@ -61,7 +61,7 @@
 
 **总计：6-11 小时/产品。** Listify 2 分钟搞定。
 
-[Listify 免费试用 →](https://listify.ai)
+[Listify 免费试用 →](https://web-production-65f93.up.railway.app)
 
 ### 工具 5：Canva
 **用途：** 做 A+ 内容图片、产品图标注、社交媒体素材  
@@ -180,4 +180,4 @@
 
 其他所有工具都在上架之后才用得到。但 Listing 是你第一个要面对的问题。
 
-[Listify — 免费生成你的第一个全平台 Listing →](https://listify.ai)
+[Listify — 免费生成你的第一个全平台 Listing →](https://web-production-65f93.up.railway.app)

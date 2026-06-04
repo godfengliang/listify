@@ -204,7 +204,7 @@ Manually optimizing titles for every product across every platform is tedious.
 
 **Listify** generates Amazon-optimized titles automatically — keyword placement, character limits, and formatting all handled for you. Plus Shopify, Temu, and TikTok Shop variants.
 
-[Generate optimized titles free →](https://listify.ai)
+[Generate optimized titles free →](https://web-production-65f93.up.railway.app)
 
 ---
 
