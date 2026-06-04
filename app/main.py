@@ -5,6 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes import router
+from app.blog_routes import blog_router
 
 app = FastAPI(title="Listify", version="0.2.0")
 
@@ -44,6 +45,7 @@ async def rate_limit(request: Request, call_next):
 
 
 app.include_router(router)
+app.include_router(blog_router)
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 
