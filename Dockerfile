@@ -11,4 +11,8 @@ RUN mkdir -p /app/data
 
 EXPOSE 8000
 
-CMD python -m uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
+# Railway injects PORT as an env variable — use an entrypoint script to handle it
+COPY docker-entrypoint.sh /app/
+RUN chmod +x /app/docker-entrypoint.sh
+
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
