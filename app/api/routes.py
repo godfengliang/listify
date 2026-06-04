@@ -113,6 +113,11 @@ async def api_me(request: Request):
 
 # ─── Listing generation ───
 
+import threading
+import uuid
+
+_generation_tasks: dict[str, dict] = {}
+
 class ListingRequest(BaseModel):
     product_name: str
     product_specs: str
@@ -121,11 +126,8 @@ class ListingRequest(BaseModel):
     language: str = "English"
 
 
-@router.post("/api/generate")
-async def api_generate_listings(req: ListingRequest, request: Request):
-    session, user = _check_auth_and_quota(request)
-    if not req.product_name.strip():
-        raise HTTPException(400, "产品名称不能为空")
+def _run_generation(task_id: str, user_id: int, req: ListingRequest):
+    """Run listing generation in background thread."""
     try:
         result = generate_listings(
             product_name=req.product_name, product_specs=req.product_specs,
@@ -133,14 +135,51 @@ async def api_generate_listings(req: ListingRequest, request: Request):
             language=req.language,
         )
         result_json = json.dumps(result, ensure_ascii=False)
-        save_listing(session["user_id"], req.product_name, req.product_specs, req.language, result_json)
-        result["_meta"] = {
+        save_listing(user_id, req.product_name, req.product_specs, req.language, result_json)
+        _generation_tasks[task_id] = {"status": "done", "result": result}
+    except Exception as e:
+        _generation_tasks[task_id] = {"status": "error", "error": str(e)}
+
+
+@router.post("/api/generate")
+async def api_generate_listings(req: ListingRequest, request: Request):
+    session, user = _check_auth_and_quota(request)
+    if not req.product_name.strip():
+        raise HTTPException(400, "产品名称不能为空")
+
+    task_id = uuid.uuid4().hex
+    _generation_tasks[task_id] = {"status": "processing"}
+
+    thread = threading.Thread(target=_run_generation, args=(task_id, session["user_id"], req))
+    thread.daemon = True
+    thread.start()
+
+    return {
+        "ok": True,
+        "task_id": task_id,
+        "status": "processing",
+        "_meta": {
             "generations_left": user["free_generations_left"] if user["plan"] == "free" else "∞",
             "plan": user["plan"],
-        }
-        return result
-    except Exception as e:
-        raise HTTPException(500, f"生成失败：{str(e)}")
+        },
+    }
+
+
+@router.get("/api/generate/{task_id}")
+async def api_get_generation(task_id: str):
+    task = _generation_tasks.get(task_id)
+    if not task:
+        raise HTTPException(404, "任务未找到")
+    if task["status"] == "processing":
+        return {"ok": True, "status": "processing"}
+    if task["status"] == "error":
+        # Clean up old task
+        del _generation_tasks[task_id]
+        raise HTTPException(500, f"生成失败：{task['error']}")
+    # Clean up completed task
+    result = task["result"]
+    del _generation_tasks[task_id]
+    return {"ok": True, "status": "done", **result}
 
 
 # ─── Competitor Analysis ───

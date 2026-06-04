@@ -102,7 +102,6 @@ async function handleGenerate(e) {
     };
 
     btn.disabled = true;
-    btn.textContent = '⏳ 生成中...';
     document.getElementById('loading').classList.remove('hidden');
     document.getElementById('results').classList.add('hidden');
     document.getElementById('paywall').classList.add('hidden');
@@ -111,15 +110,9 @@ async function handleGenerate(e) {
 
     const res = await api('/api/generate', 'POST', data);
 
-    if (res.ok) {
-        renderResults(res.data);
-        document.getElementById('results').classList.remove('hidden');
-        // Update remaining count
-        if (res.data._meta) {
-            const left = res.data._meta.generations_left;
-            document.getElementById('generations-left').textContent =
-                res.data._meta.plan === 'free' ? `剩余免费次数：${left}` : 'Pro 无限生成';
-        }
+    if (res.ok && res.data.task_id) {
+        document.getElementById('loading').innerHTML = '<div class="spinner"></div><p>AI 正在生成中，约 10-20 秒...</p>';
+        await pollTask(res.data.task_id, res.data);
     } else if (res.status === 403) {
         document.getElementById('paywall').classList.remove('hidden');
     } else {
@@ -129,6 +122,31 @@ async function handleGenerate(e) {
     btn.disabled = false;
     btn.textContent = '⚡ 一键生成全平台 Listing';
     document.getElementById('loading').classList.add('hidden');
+}
+
+async function pollTask(taskId, meta) {
+    for (let i = 0; i < 30; i++) {
+        await new Promise(r => setTimeout(r, 1500));
+        const res = await api(`/api/generate/${taskId}`, 'GET');
+        if (!res.ok) {
+            if (res.status === 404) continue;
+            showError(res.data?.detail || '生成失败');
+            return;
+        }
+        if (res.data.status === 'done') {
+            renderResults(res.data);
+            document.getElementById('results').classList.remove('hidden');
+            if (meta._meta) {
+                document.getElementById('generations-left').textContent =
+                    meta._meta.plan === 'free' ? `剩余免费次数：${meta._meta.generations_left}` : 'Pro 无限生成';
+            }
+            return;
+        }
+        // Update loading text
+        const elapsed = Math.round((i + 1) * 1.5);
+        document.getElementById('loading').innerHTML = `<div class="spinner"></div><p>AI 正在生成中...已等待 ${elapsed} 秒</p>`;
+    }
+    showError('生成超时，请重试');
 }
 
 // ─── History ───
