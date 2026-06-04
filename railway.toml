@@ -1,8 +1,7 @@
 [build]
-builder = "NIXPACKS"
+builder = "DOCKERFILE"
 
 [deploy]
-startCommand = "/bin/sh -c \"python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT\""
 healthcheckPath = "/api/health"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
