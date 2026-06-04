@@ -181,6 +181,12 @@ async def blog_index():
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Listify Blog — 跨境电商 Listing 优化指南</title>
+    <meta name="description" content="跨境电商 Listing 优化、SEO 关键词、多平台运营指南。覆盖 Amazon、Shopify、Temu、TikTok Shop 的完整教程和模板。">
+    <meta property="og:title" content="Listify Blog — 跨境电商 Listing 优化指南">
+    <meta property="og:description" content="跨境电商 Listing 优化、SEO 关键词、多平台运营指南。免费 AI Listing 生成工具。">
+    <meta property="og:type" content="website">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://listify.ai/blog">
     <link rel="stylesheet" href="/static/style.css">
     <style>
         .blog-header {{ text-align: center; padding: 40px 20px 20px; }}
@@ -262,6 +268,10 @@ async def blog_post(slug: str):
     display_title = re.sub(r'^SEO Blog \d+: ', '', title)
     display_title = display_title.strip('"')
 
+    # Extract meta description for SEO
+    meta_desc_match = re.search(r'^## Meta Description\n(.+)$', content, re.MULTILINE)
+    meta_description = meta_desc_match.group(1) if meta_desc_match else display_title
+
     # Remove the first heading line and meta lines before parsing
     body_content = content
     if title_match:
@@ -274,6 +284,12 @@ async def blog_post(slug: str):
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{display_title} — Listify Blog</title>
+    <meta name="description" content="{meta_description}">
+    <meta property="og:title" content="{display_title}">
+    <meta property="og:description" content="{meta_description}">
+    <meta property="og:type" content="article">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://listify.ai/blog/{slug}">
     <link rel="stylesheet" href="/static/style.css">
     <style>
         .blog-header {{ text-align: center; padding: 40px 20px 20px; }}
