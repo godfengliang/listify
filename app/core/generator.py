@@ -3,7 +3,17 @@
 from openai import OpenAI
 from app.config import AI_API_KEY, AI_BASE_URL, AI_MODEL
 
-client = OpenAI(api_key=AI_API_KEY, base_url=AI_BASE_URL)
+_client = None
+
+
+def _get_client():
+    """Lazy init OpenAI client — only when needed."""
+    global _client
+    if _client is None:
+        if not AI_API_KEY:
+            raise RuntimeError("AI_API_KEY not configured")
+        _client = OpenAI(api_key=AI_API_KEY, base_url=AI_BASE_URL)
+    return _client
 
 PLATFORM_PROMPTS = {
     "amazon": {
@@ -105,7 +115,7 @@ Platform-specific requirements:
 
 Make every listing compelling, keyword-rich, and conversion-optimized for its platform."""
 
-    response = client.chat.completions.create(
+    response = _get_client().chat.completions.create(
         model=AI_MODEL,
         messages=[
             {"role": "system", "content": system_prompt},
